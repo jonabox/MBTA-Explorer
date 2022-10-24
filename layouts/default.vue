@@ -7,10 +7,6 @@
       color="rgb(255, 255, 255, 0.1)"
       style="backdrop-filter: blur(4px)"
     >
-      <v-app-bar-nav-icon
-        v-if="isScreenSmall"
-        @click.stop="drawer = !drawer"
-      ></v-app-bar-nav-icon>
       <v-toolbar-title v-text="isScreenSmall ? shortTitle : title" />
       <v-spacer />
       <v-btn large icon href="https://github.com/jonabox">
@@ -81,7 +77,7 @@ export default {
       miniVariant: false,
       drawer: false,
       title: "PRISM Interview Challenge",
-      shortTitle: "PRISM Challenge",
+      shortTitle: "PRISM Interview Challenge",
     };
   },
 };
