@@ -8,20 +8,6 @@
       style="backdrop-filter: blur(4px)"
     >
       <v-toolbar-title v-text="isScreenSmall ? shortTitle : title" />
-      <v-spacer />
-      <v-btn large icon href="https://github.com/jonabox">
-        <v-icon>mdi-github</v-icon>
-      </v-btn>
-      <v-btn
-        large
-        icon
-        href="https://linkedin.com/in/jonathan-esteban-771066138/"
-      >
-        <v-icon>mdi-linkedin</v-icon>
-      </v-btn>
-      <v-btn large icon href="mailto:jesteban@mit.edu">
-        <v-icon>mdi-email</v-icon>
-      </v-btn>
     </v-app-bar>
     <v-main>
       <v-fade-transition>
