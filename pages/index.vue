@@ -127,7 +127,7 @@
             </v-col>
             <v-col>
               <v-autocomplete
-                label="label"
+                label="destination"
                 auto-select-first
                 :items="stops"
                 v-model="destination"
