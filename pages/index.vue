@@ -1,12 +1,19 @@
 <template>
   <v-layout>
     <v-container fluid>
-      <v-tabs v-model="tab" class="mb-4" color="black" background-color="transparent" grow>
+      <v-tabs
+        v-model="tab"
+        class="mb-4"
+        color="black"
+        background-color="transparent"
+        grow
+      >
         <v-tab>Exercise 1</v-tab>
         <v-tab>Exercise 2</v-tab>
         <v-tab>Exercise 3</v-tab>
       </v-tabs>
       <v-tabs-items style="background-color: transparent" v-model="tab">
+        <!-- Exercise 1 -->
         <v-tab-item>
           <v-row>
             <v-col
@@ -29,7 +36,10 @@
                   height="5"
                   width="100%"
                 ></v-sheet>
-                <v-card-title v-text="route.attributes.long_name" />
+                <v-card-title
+                  style="word-break: normal"
+                  v-text="route.attributes.long_name"
+                />
                 <v-card-subtitle
                   v-text="
                     route.attributes.direction_destinations[0] +
@@ -41,9 +51,10 @@
             </v-col>
           </v-row>
         </v-tab-item>
+        <!-- Exercise 2 -->
         <v-tab-item>
           <v-row>
-            <v-col cols="2">
+            <v-col cols="auto">
               <h1>Stop Counts</h1>
               <v-card
                 v-for="(stopsInRoute, index) in stopCounts"
@@ -56,7 +67,10 @@
                   height="5"
                   width="100%"
                 ></v-sheet>
-                <v-card-title v-text="stopsInRoute.name" />
+                <v-card-title
+                  style="word-break: normal"
+                  v-text="stopsInRoute.name"
+                />
                 <v-card-subtitle>
                   {{
                     stopsInRoute.count +
@@ -80,7 +94,7 @@
                       class="mx-1 my-4"
                       width="500"
                     >
-                      <v-card-title v-text="stop" />
+                      <v-card-title style="word-break: normal" v-text="stop" />
                       <v-chip
                         v-for="route in connectedRoutes"
                         :key="route.id"
@@ -99,6 +113,7 @@
             </v-col>
           </v-row>
         </v-tab-item>
+        <!-- Exercise 3 -->
         <v-tab-item>
           <h1>Route Finder (Solution might not be optimal!)</h1>
           <v-row>
@@ -152,7 +167,7 @@ export default {
       start: null,
       destination: null,
       routingResult: null,
-      tab: null
+      tab: null,
     };
   },
   mounted() {
@@ -201,44 +216,53 @@ export default {
       this.$axios
         .get("https://api-v3.mbta.com/stops", data)
         .then((response) => {
-          // store the number of stops for the route
           let routeName = route.attributes.long_name;
-          this.stopCounts.push({
-            name: routeName,
-            color: route.attributes.color,
-            count: response.data["data"].length,
-          });
-          // sort routes by number of stops; decreasing order
-          this.stopCounts.sort(function (a, b) {
-            return b.count - a.count;
-          });
-          // find stops that connect two or more routes
-          for (let stop of response.data["data"]) {
-            let stopName = stop.attributes.name;
-            this.stops.push(stopName);
-            // add stop to route map
-            if (this.routesToStops.has(routeName)) {
-              let stops = this.routesToStops.get(routeName);
-              stops.push(stopName);
-            } else {
-              let stops = [stopName];
-              this.routesToStops.set(routeName, stops);
-            }
-            // check if same stop has already been found
-            if (this.stopToConnectedRoutes.has(stopName)) {
-              let connectedRoutes = this.stopToConnectedRoutes.get(stopName);
-              connectedRoutes.push(route);
-            } else {
-              // else create connected routes array for current stop
-              let connectedRoutes = [route];
-              this.stopToConnectedRoutes.set(stopName, connectedRoutes);
-            }
-          }
+          let routeColor = route.attributes.color;
+          let routeStopCount = response.data["data"].length;
+          this.generateStopCountForRoute(routeName, routeColor, routeStopCount);
+          this.findConnectingRoutes(route, response);
           this.generateRouteMap();
         })
         .catch((error) => {
           console.log(error);
         });
+    },
+    // stores the number of stops for the route
+    generateStopCountForRoute(routeName, routeColor, routeStopCount) {
+      this.stopCounts.push({
+        name: routeName,
+        color: routeColor,
+        count: routeStopCount,
+      });
+      // sort routes by number of stops; decreasing order
+      this.stopCounts.sort(function (a, b) {
+        return b.count - a.count;
+      });
+    },
+    // find stops that connect to one or more
+    findConnectingRoutes(route, response) {
+      const routeName = route.attributes.long_name;
+      for (let stop of response.data["data"]) {
+        let stopName = stop.attributes.name;
+        this.stops.push(stopName);
+        // add stop to route map
+        if (this.routesToStops.has(routeName)) {
+          let stops = this.routesToStops.get(routeName);
+          stops.push(stopName);
+        } else {
+          let stops = [stopName];
+          this.routesToStops.set(routeName, stops);
+        }
+        // check if same stop has already been found
+        if (this.stopToConnectedRoutes.has(stopName)) {
+          let connectedRoutes = this.stopToConnectedRoutes.get(stopName);
+          connectedRoutes.push(route);
+        } else {
+          // else create connected routes array for current stop
+          let connectedRoutes = [route];
+          this.stopToConnectedRoutes.set(stopName, connectedRoutes);
+        }
+      }
     },
     // generate graph of routes connecting to other routes
     generateRouteMap() {
