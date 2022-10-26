@@ -81,8 +81,8 @@
               </v-card>
             </v-col>
             <v-col cols="10">
-              <h1>Connections</h1>
               <v-container>
+                <h1>Connections</h1>
                 <v-row>
                   <template
                     v-for="[stop, connectedRoutes] in stopToConnectedRoutes"
@@ -139,12 +139,15 @@
           </v-row>
           <v-row v-if="routingResult">
             <v-timeline class="ma-4">
+              <v-timeline-item icon="mdi-star"> start </v-timeline-item>
               <v-timeline-item
                 v-for="route in routingResult"
-                color="white"
+                :color="routesToColor.get(route)"
                 :key="route"
+                icon="mdi-train"
                 >{{ route }}</v-timeline-item
               >
+              <v-timeline-item icon="mdi-check"> destination </v-timeline-item>
             </v-timeline>
           </v-row></v-tab-item
         >
@@ -162,6 +165,7 @@ export default {
       stops: [],
       stopCounts: [],
       stopToConnectedRoutes: new Map(),
+      routesToColor: new Map(),
       routesToStops: new Map(),
       routesToAdjacentRoutes: new Map(),
       start: null,
@@ -188,6 +192,8 @@ export default {
         .get("https://api-v3.mbta.com/routes", data)
         .then((response) => {
           for (let route of response.data["data"]) {
+            // store route color
+            this.processRouteColor(route);
             // process stops for each route
             this.getStops(route);
             // type-0 and type-1 correspond to light and heavy rails, respectively
@@ -201,6 +207,13 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    },
+    // stores route color in reactive map
+    processRouteColor(route) {
+      const name = route.attributes.long_name;
+      // append # for hex format
+      const color = "#" + route.attributes.color;
+      this.routesToColor.set(name, color);
     },
     // fetches all the stops for a specific route in the MBTA
     getStops(route) {
